@@ -3,389 +3,489 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Jhingl Notes Go</title>
+<title>Jhingl Notes Pro</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
-
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;700&display=swap');
 :root {
-  --bg:#0a0e1a; --surface:#111827; --card:#1a2235; --card2:#1e2a3d;
-  --text:#f1f5f9; --muted:#64748b; --border:rgba(255,255,255,0.06);
-  --primary:#6366f1; --primary2:#818cf8;
+  --bg:#000000; --surface:#111111; --card:#1a1a1a; --text:#ffffff; --muted:#888888; --border:rgba(255,255,255,0.1); --primary:#ffffff;
 }
+body.light-mode { --bg:#ffffff; --surface:#f2f2f2; --card:#ffffff; --text:#000000; --border:rgba(0,0,0,0.1); --primary:#000000; }
 
-body.light-mode {
-  --bg:#f8fafc; --surface:#ffffff; --card:#f1f5f9; --card2:#e2e8f0;
-  --text:#0f172a; --muted:#64748b; --border:rgba(0,0,0,0.08);
-}
-
-body.color-indigo { --primary:#6366f1; --primary2:#818cf8; }
-body.color-purple { --primary:#a855f7; --primary2:#c084fc; }
-body.color-green  { --primary:#10b981; --primary2:#34d399; }
-body.color-amber  { --primary:#f59e0b; --primary2:#fbbf24; }
-body.color-red    { --primary:#ef4444; --primary2:#f87171; }
+body.color-white { --primary:var(--text); } body.color-slate { --primary:#94a3b8; } 
+body.color-pink { --primary:#ff4d6d; } body.color-red { --primary:#ef4444; }
+body.color-green { --primary:#10b981; } body.color-blue { --primary:#3b82f6; }
+body.color-amber { --primary:#f59e0b; } body.color-orange { --primary:#f97316; }
 
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-body{font-family:'DM Sans',Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition: background 0.3s;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:0.3s;overflow-x:hidden;}
 
-/* HEADER */
-.app-header{position:sticky;top:0;z-index:50;background:var(--bg);border-bottom:1px solid var(--border);padding:13px 18px;display:flex;align-items:center;justify-content:space-between;}
-.app-title{font-family:'Syne',Arial,sans-serif;font-size:20px;font-weight:800;background:linear-gradient(135deg, var(--primary), var(--primary2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-0.5px;}
+/* Cabeçalho */
+.app-header{position:sticky;top:0;z-index:50;background:var(--bg);border-bottom:1px solid var(--border);padding:12px 18px;display:flex;align-items:center;justify-content:space-between;}
+.app-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--primary);transition:0.3s;}
+.container{padding:18px; padding-bottom:100px;}
 
-.container{padding:18px;}
-.section-header{display:flex;align-items:center;justify-content:space-between;margin:15px 0 10px;}
-.section-title{font-family:'Syne',Arial,sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;color:var(--muted);letter-spacing:1px;}
+/* Barra de Pesquisa */
+.search-container{padding: 10px 18px 0;}
+.search-bar{width:100%;padding:14px 18px;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:14px;font-family:'DM Sans';font-size:14px;outline:none;transition:0.2s;}
+.search-bar:focus{border-color:var(--primary); background:var(--card);}
 
-/* GRID & CARDS */
+.section-header{display:flex;align-items:center;justify-content:space-between;margin:15px 0 10px;font-family:'Syne',sans-serif;font-size:12px;text-transform:uppercase;color:var(--muted);letter-spacing:1px;}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;}
-.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:15px;cursor:pointer;transition:0.2s;position:relative;}
-.card:active{transform:scale(0.96);background:var(--card2);}
-.card.active-folder{border:2px solid var(--primary);background:var(--card2);}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:15px;cursor:pointer;transition:0.2s;display:flex;flex-direction:column;justify-content:space-between;min-height:95px;position:relative;}
+.card-special{grid-column: span 2; border: 1px dashed var(--primary); min-height: 65px; justify-content: center;}
 
-.card-special{grid-column: span 2; background: linear-gradient(135deg, var(--card), var(--card2)); border: 1px dashed var(--primary); margin-bottom: 5px;}
+/* Efeitos da Seleção Múltipla */
+.card.selected-card { border: 2px solid var(--primary); transform: scale(0.95); opacity: 0.9; }
+.select-check { position:absolute; top:10px; right:10px; width:22px; height:22px; background:var(--primary); color:var(--bg); border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:12px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+.select-check.empty { background:var(--surface); border:1px solid var(--border); color:transparent; }
 
-.folder-icon{font-size:24px;margin-bottom:8px;display:block;}
-.note-title{font-family:'Syne',Arial,sans-serif;font-size:13px;font-weight:600;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.note-preview{font-size:11px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.note-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:6px;color:inherit;word-break:break-word;line-height:1.2;}
+.note-preview{font-size:13px;opacity:0.7;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;color:inherit;margin-bottom:6px;}
+.note-date{font-size:11px;opacity:0.5;text-align:right;font-weight:700;}
 
-/* EDITOR PAGE */
+/* Página da Nota */
 #notePage{display:none;flex-direction:column;position:fixed;inset:0;background:var(--bg);z-index:100;}
-.note-page-header{padding:10px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);background:var(--bg);}
-.back-btn{width:38px;height:38px;border-radius:12px;border:1px solid var(--border);background:var(--card);color:var(--text);display:flex;align-items:center;justify-content:center;cursor:pointer;}
-.note-page-title-input{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-family:'Syne',Arial,sans-serif;font-size:17px;font-weight:700;}
+.note-page-header{padding:10px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);}
+.back-btn{width:38px;height:38px;border-radius:12px;border:1px solid var(--border);background:var(--card);color:var(--text);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;}
+.note-page-title-input{flex:1;background:transparent;border:none;outline:none;color:inherit;font-family:'Syne',sans-serif;font-size:18px;font-weight:700;}
 
-/* TOOLBAR */
-.editor-toolbar{background:var(--surface);border-bottom:1px solid var(--border);padding:8px;display:flex;gap:6px;overflow-x:auto;align-items:center;flex-shrink:0;}
-.tb-select{padding:6px;background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:8px;font-size:12px;outline:none;}
-.tb-btn{padding:8px 12px;background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:8px;cursor:pointer;font-weight:bold;min-width:42px;text-align:center;}
-.tb-btn.active{background:var(--primary);color:white;border-color:var(--primary);}
+/* Toolbar do Editor */
+.editor-toolbar{background:rgba(255,255,255,0.05);border-bottom:1px solid var(--border);padding:8px;display:flex;gap:6px;overflow-x:auto;align-items:center;}
+.tb-btn{padding:8px 12px;background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:8px;cursor:pointer;font-weight:bold;transition:0.2s;height:38px;display:flex;align-items:center;justify-content:center;}
+.tb-btn.active{background:var(--primary);color:var(--bg);border-color:var(--primary);}
+input[type="color"].tb-btn { padding: 0; width: 38px; border-radius: 8px; overflow: hidden; cursor:pointer;}
+input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+input[type="color"]::-webkit-color-swatch { border: none; border-radius: 8px; }
 
-.editor-scroll{flex:1;padding:20px;overflow-y:auto;-webkit-overflow-scrolling:touch;}
-.note-editor{min-height:100%;outline:none;line-height:1.7;font-size:18px;color:var(--text);word-wrap:break-word;}
-.note-editor:empty::before{content:attr(data-placeholder);color:var(--muted);pointer-events:none;}
-
+.editor-scroll{flex:1;padding:20px;overflow-y:auto;}
+.note-editor{min-height:100%;outline:none;line-height:1.7;font-size:18px;font-family:'DM Sans', sans-serif;color:inherit;}
+.note-editor[data-placeholder]:empty:before{content:attr(data-placeholder);color:var(--muted);opacity:0.5;}
+.note-editor a { color: #3b82f6 !important; text-decoration: underline !important; pointer-events: auto; cursor: pointer; }
+/* Paineis e Menus */
 .note-meta-panel{background:var(--surface);border-top:1px solid var(--border);padding:15px;display:flex;flex-direction:column;gap:10px;}
-.folder-select{padding:12px;background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:12px;}
+.color-opt{width:32px;height:32px;border-radius:50%;flex-shrink:0;cursor:pointer;border:2px solid rgba(255,255,255,0.1);}
+.color-opt.active{border:2px solid var(--text);transform:scale(1.1);}
+.btn{flex:1;padding:14px;border-radius:12px;border:none;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;cursor:pointer;}
 
-.btn-row{display:flex;gap:10px;}
-.btn{flex:1;padding:14px;border-radius:12px;border:none;font-family:'Syne',Arial,sans-serif;font-weight:700;cursor:pointer;}
-.btn-save{background:var(--primary);color:white;}
-.btn-delete{background:rgba(239,68,68,0.1);color:#f87171;border:1px solid rgba(239,68,68,0.2);}
-.btn-delete-folder{background:transparent; color:#ef4444; border:none; font-size:10px; font-weight:700; text-transform:uppercase; cursor:pointer;}
-
-/* MODALS */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;z-index:200;}
+.modal-overlay{position:fixed;inset:0;background:transparent;display:none;align-items:center;justify-content:center;z-index:200;}
 .modal-overlay.open{display:flex;}
-.modal-box{background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:22px;width:90%;max-width:350px;}
+.modal-box{background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:22px;width:90%;max-width:350px;box-shadow:0 20px 50px rgba(0,0,0,0.8);}
 .data-btn{width:100%;padding:14px;margin-bottom:8px;background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:12px;text-align:left;cursor:pointer;font-weight:600;}
-.theme-grid{display:flex;gap:10px;margin:15px 0;}
-.theme-dot{width:35px;height:35px;border-radius:50%;cursor:pointer;border:2px solid transparent;}
+.theme-dot{width:30px;height:30px;border-radius:50%;cursor:pointer;margin:4px;display:inline-block;border:1px solid rgba(255,255,255,0.1);}
+.fab{position:fixed;bottom:25px;right:25px;width:60px;height:60px;border-radius:50%;background:var(--primary);color:var(--bg);border:none;font-size:30px;cursor:pointer;box-shadow:0 10px 25px rgba(0,0,0,0.5);z-index:90;transition:0.3s;}
+.fab.hidden { transform: scale(0); opacity: 0; pointer-events: none; }
 
-.fab{position:fixed;bottom:25px;right:25px;width:60px;height:60px;border-radius:50%;background:var(--primary);color:white;border:none;font-size:30px;cursor:pointer;box-shadow:0 10px 25px rgba(0,0,0,0.4);z-index:90;}
+.selection-bar { position:fixed; bottom:0; left:0; right:0; background:var(--surface); border-top:1px solid var(--border); padding:15px 20px; display:flex; justify-content:space-between; align-items:center; z-index:150; transform:translateY(100%); transition:0.3s; box-shadow: 0 -10px 30px rgba(0,0,0,0.5); }
+.selection-bar.show { transform:translateY(0); }
+.sel-count { font-family:'Syne',sans-serif; font-weight:700; font-size:16px; color:var(--text); }
+
+#saveToast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: var(--primary); color: var(--bg); padding: 8px 16px; border-radius: 20px; font-weight: bold; font-size: 12px; opacity: 0; pointer-events: none; transition: 0.3s; z-index: 300; }
+#saveToast.show { opacity: 1; transform: translate(-50%, 10px); }
+#errorScreen { display:none; position:fixed; inset:0; background:#000; color:#fff; z-index:9999; padding:30px; text-align:center; font-family:sans-serif; flex-direction:column; justify-content:center; align-items:center; }
+#errorScreen button { margin-top:20px; padding:15px 30px; background:#ef4444; color:#fff; border:none; border-radius:12px; font-weight:bold; cursor:pointer; }
 </style>
 </head>
-<body class="color-indigo">
+<body class="color-white">
+
+<div id="errorScreen">
+    <h2>Eita, algo deu errado! 😢</h2><p>O cache do aplicativo parece estar corrompido.</p>
+    <button onclick="localStorage.clear(); location.reload();">Restaurar Aplicativo (Limpar Dados)</button>
+</div>
+
+<div id="saveToast">Salvo ✓</div>
+
+<div id="selectionBar" class="selection-bar">
+    <div class="sel-count" id="selCount">0</div>
+    <div style="display:flex; gap:10px;">
+        <button class="btn" style="background:#ef4444; color:#fff; padding:10px 15px;" onclick="deleteSelectedNotes()" data-t="del_note">Excluir</button>
+        <button class="btn" style="background:transparent; border:1px solid var(--border); color:var(--text); padding:10px 15px;" onclick="cancelSelection()">✕</button>
+    </div>
+</div>
 
 <div id="home">
   <div class="app-header">
-    <div class="app-title">Jhingl Notes</div>
-    <button class="back-btn" onclick="openModal('settingsModal')">⚙️</button>
+      <div class="app-title">Jhingl Notes</div>
+      <button class="back-btn" onclick="openModal('mainMenuModal')" style="font-weight:bold;">⋮</button>
   </div>
+  <div class="search-container"><input type="text" id="searchInput" class="search-bar" oninput="renderHome()"></div>
   <div class="container" id="homeContainer"></div>
 </div>
 
 <div id="notePage">
   <div class="note-page-header">
-    <button class="back-btn" onclick="goBack()">←</button>
-    <input class="note-page-title-input" id="noteTitleInput" placeholder="Título...">
-    <button class="btn-save" style="padding:8px 15px; flex:none" onclick="saveNote()">Salvar</button>
+      <button class="back-btn" onclick="closeNote()">←</button>
+      <input class="note-page-title-input" id="noteTitleInput" oninput="triggerAutoSave()">
+      <button class="btn" style="background:var(--primary);color:var(--bg);padding:8px 15px;flex:none" onclick="manualSave()" data-t="save">Salvar</button>
   </div>
-
   <div class="editor-toolbar">
-    <select class="tb-select" id="fontFamilySelect" onchange="exec('fontName', this.value)">
-      <option value="Arial">Sans</option>
-      <option value="Georgia">Serif</option>
-      <option value="Courier New">Mono</option>
+    <select class="tb-btn" style="width:75px" id="fontSel" onchange="applyFormat('fontName', this.value)">
+        <option value="'DM Sans', sans-serif">Sans</option><option value="Georgia, serif">Serif</option><option value="'Courier New', monospace">Mono</option>
     </select>
-    
-    <select class="tb-select" id="fontSizeSelect" onchange="applyCustomSize(this.value)">
-      <option value="13px">P</option>
-      <option value="18px" selected>M</option>
-      <option value="32px">G</option>
+    <select class="tb-btn" style="width:55px" id="sizeSel" onchange="applyFormat('fontSize', this.value)">
+        <option value="14px">P</option><option value="18px" selected>M</option><option value="28px">G</option>
     </select>
-
-    <button class="tb-btn" id="btn-bold" onmousedown="event.preventDefault(); exec('bold')">B</button>
-    <button class="tb-btn" id="btn-italic" onmousedown="event.preventDefault(); exec('italic')">I</button>
-    <button class="tb-btn" id="btn-underline" onmousedown="event.preventDefault(); exec('underline')">U</button>
+    <input type="color" id="textColorSel" class="tb-btn" title="Cor do Texto" value="#ffffff" onchange="applyFormat('foreColor', this.value)">
+    <button class="tb-btn" id="btn-bold" onmousedown="event.preventDefault(); applyFormat('bold')">B</button>
+    <button class="tb-btn" id="btn-italic" onmousedown="event.preventDefault(); applyFormat('italic')">I</button>
+    <button class="tb-btn" id="btn-underline" onmousedown="event.preventDefault(); applyFormat('underline')">U</button>
   </div>
-
-  <div class="editor-scroll">
-    <div class="note-editor" id="noteEditor" contenteditable="true" data-placeholder="Escreva algo..."></div>
-  </div>
-
+  <div class="editor-scroll"><div class="note-editor" id="noteEditor" contenteditable="true" oninput="triggerAutoSave()"></div></div>
   <div class="note-meta-panel">
-    <select class="folder-select" id="noteFolderSelect"></select>
-    <div class="btn-row">
-        <button class="btn btn-delete" onclick="deleteNote()">Excluir Nota</button>
-        <button class="btn btn-save" onclick="saveNote()">Salvar</button>
+    <div style="display:flex;gap:10px;overflow-x:auto;padding-bottom:5px" id="noteColorPicker"></div>
+    <select class="data-btn" id="noteFolderSelect" style="width:100%" onchange="triggerAutoSave()"></select>
+    <div style="display:flex;gap:10px">
+        <button class="btn" style="background:rgba(239,68,68,0.1);color:#f87171" onclick="deleteSingleNote()">Excluir Nota</button>
     </div>
   </div>
 </div>
 
-<button class="fab" onclick="openModal('menuModal')">+</button>
+<button class="fab" id="mainFab" onclick="openModal('addModal')">+</button>
 
-<div class="modal-overlay" id="menuModal">
-  <div class="modal-box">
-    <button class="data-btn" onclick="startNewNote()">📝 Nova Nota</button>
-    <button class="data-btn" onclick="startNewFolder()">📁 Nova Pasta</button>
-    <button class="data-btn" onclick="closeModal('menuModal')" style="background:transparent; border:none; text-align:center">Cancelar</button>
+<div class="modal-overlay" id="addModal"><div class="modal-box">
+  <button class="data-btn" onclick="startNewNote()" data-t="new_note">📝 Nova Nota</button>
+  <button class="data-btn" onclick="startNewFolder()" data-t="new_folder">📁 Nova Pasta</button>
+  <button class="data-btn" onclick="closeModal('addModal')" data-t="cancel" style="text-align:center">Cancelar</button>
+</div></div>
+
+<div class="modal-overlay" id="mainMenuModal"><div class="modal-box">
+  <button class="data-btn" onclick="closeModal('mainMenuModal'); openModal('settingsModal')" data-t="settings_btn">⚙️ Configurações</button>
+  <button class="data-btn" onclick="closeModal('mainMenuModal'); openModal('aboutModal')" data-t="about_btn">ℹ️ Sobre a Empresa</button>
+  <button class="data-btn" onclick="closeModal('mainMenuModal')" data-t="close" style="text-align:center">Fechar</button>
+</div></div>
+
+<div class="modal-overlay" id="aboutModal"><div class="modal-box" style="text-align:center;">
+  <h3 style="margin-bottom:15px; font-family:'Syne',sans-serif;" data-t="about_title">Sobre a Empresa</h3>
+  <p style="font-size:14px; line-height:1.6; margin-bottom:15px; color:var(--muted);">
+    <span data-t="about_desc">Empresa criadora de apps, sites e jogos.</span><br><br>
+    <strong><span data-t="owner">Proprietário:</span></strong> Tarcísio<br>
+    <strong><span data-t="founded">Fundação:</span></strong> 2026<br>
+    <em><span data-t="no_cost">(Sem custo monetário e sem CNPJ)</span></em>
+  </p>
+  <div style="background:var(--card); padding:15px; border-radius:12px; margin-bottom:15px; border:1px solid var(--border);">
+      <p style="font-size:13px; margin-bottom:5px; font-weight:bold;" data-t="support_title">💖 Apoie a empresa</p>
+      <p style="font-size:12px; color:var(--muted); margin-bottom:8px;" data-t="support_desc">Via PayPal:</p>
+      <code style="font-size:13px; color:var(--primary); user-select:all;">tarcisioestudante13@gmail.com</code>
   </div>
-</div>
+  <button class="data-btn" onclick="closeModal('aboutModal')" style="text-align:center" data-t="close">Fechar</button>
+</div></div>
 
-<div class="modal-overlay" id="settingsModal">
-  <div class="modal-box">
-    <h3>Configurações</h3>
-    <button class="data-btn" onclick="toggleMode()" style="margin-top:15px">🌓 Alternar Claro/Escuro</button>
-    <div class="theme-grid">
-      <div class="theme-dot" style="background:#6366f1" onclick="setAccent('indigo')"></div>
-      <div class="theme-dot" style="background:#a855f7" onclick="setAccent('purple')"></div>
-      <div class="theme-dot" style="background:#10b981" onclick="setAccent('green')"></div>
-      <div class="theme-dot" style="background:#f59e0b" onclick="setAccent('amber')"></div>
-      <div class="theme-dot" style="background:#ef4444" onclick="setAccent('red')"></div>
-    </div>
-    
-    <p style="font-size:11px; color:var(--muted); margin:10px 0; font-weight:700">DADOS & VISUAL</p>
-    <button class="data-btn" onclick="exportBackup()">📤 Exportar Backup Tudo (.json)</button>
-    <button class="data-btn" onclick="document.getElementById('importInput').click()">📥 Importar Backup Tudo</button>
-    <input type="file" id="importInput" style="display:none" accept=".json" onchange="importBackup(this)">
-
-    <button class="data-btn" onclick="closeModal('settingsModal')" style="text-align:center; margin-top:10px">Fechar</button>
+<div class="modal-overlay" id="settingsModal"><div class="modal-box">
+  <h3 data-t="settings" style="margin-bottom:15px; font-family:'Syne',sans-serif;">Configurações</h3>
+  <select class="data-btn" style="width:100%;margin-bottom:10px" onchange="setLang(this.value)" id="langSelect">
+      <option value="pt">Português</option><option value="en">English</option><option value="es">Español</option><option value="jp">日本語</option>
+  </select>
+  <button class="data-btn" onclick="toggleMode()">🌓 <span data-t="toggle_theme">Tema</span></button>
+  <div style="margin:15px 0; text-align: center;">
+    <div class="theme-dot" style="background:#ffffff" onclick="setAccent('white')"></div>
+    <div class="theme-dot" style="background:#94a3b8" onclick="setAccent('slate')"></div>
+    <div class="theme-dot" style="background:#ff4d6d" onclick="setAccent('pink')"></div>
+    <div class="theme-dot" style="background:#ef4444" onclick="setAccent('red')"></div>
+    <div class="theme-dot" style="background:#10b981" onclick="setAccent('green')"></div>
+    <div class="theme-dot" style="background:#3b82f6" onclick="setAccent('blue')"></div>
+    <div class="theme-dot" style="background:#f59e0b" onclick="setAccent('amber')"></div>
+    <div class="theme-dot" style="background:#f97316" onclick="setAccent('orange')"></div>
   </div>
-</div>
-
+  <button class="data-btn" onclick="exportBackup()" data-t="export">📤 Exportar Backup</button>
+  <button class="data-btn" onclick="document.getElementById('importInput').click()" data-t="import">📥 Importar Backup</button>
+  <input type="file" id="importInput" style="display:none" onchange="importBackup(this)">
+  <button class="data-btn" onclick="closeModal('settingsModal')" data-t="close" style="text-align:center; margin-top:10px">Fechar</button>
+</div></div>
 <script>
-let notes = JSON.parse(localStorage.getItem('jhingl-notes')) || [];
-let folders = JSON.parse(localStorage.getItem('jhingl-folders')) || [];
-let currentFolderId = 'all';
-let currentNoteId = null;
-let currentMode = localStorage.getItem('jhingl-mode') || 'dark';
-let currentAccent = localStorage.getItem('jhingl-accent') || 'indigo';
+try {
 
-const editor = document.getElementById('noteEditor');
+const langData = {
+    pt: {save:"Salvar", del_note:"Excluir", new_note:"📝 Nova Nota", new_folder:"📁 Nova Pasta", cancel:"Cancelar", settings:"Configurações", settings_btn:"⚙️ Configurações", toggle_theme:"Tema", export:"📤 Exportar Backup", import:"📥 Importar Backup", close:"Fechar", principal:"Principal", folders:"Pastas", notes:"Notas", all:"Todas as Notas", del_f:"Apagar Pasta", prompt_f:"Nome da pasta:", prompt_b:"Nome do Backup?", conf_f:"Apagar pasta e as notas dentro dela?", conf_n:"Tem certeza que deseja excluir?", write:"Comece a escrever...", title:"Título...", back:"Voltar", search:"Buscar notas...", about_btn:"ℹ️ Sobre a Empresa", about_title:"Sobre a Empresa", about_desc:"Empresa criadora de apps, sites e jogos.", owner:"Proprietário:", founded:"Fundação:", no_cost:"(Sem custo monetário e sem CNPJ)", support_title:"💖 Apoie a empresa", support_desc:"Via PayPal:"},
+    en: {save:"Save", del_note:"Delete", new_note:"📝 New Note", new_folder:"📁 New Folder", cancel:"Cancel", settings:"Settings", settings_btn:"⚙️ Settings", toggle_theme:"Theme", export:"📤 Export Backup", import:"📥 Import Backup", close:"Close", principal:"Main", folders:"Folders", notes:"Notes", all:"All Notes", del_f:"Delete Folder", prompt_f:"Folder name:", prompt_b:"Backup name?", conf_f:"Delete folder and all its notes?", conf_n:"Are you sure you want to delete?", write:"Start writing...", title:"Title...", back:"Back", search:"Search notes...", about_btn:"ℹ️ About the Company", about_title:"About the Company", about_desc:"Company creating apps, websites and games.", owner:"Owner:", founded:"Founded in:", no_cost:"(No monetary cost and no CNPJ)", support_title:"💖 Support the company", support_desc:"Via PayPal:"},
+    es: {save:"Guardar", del_note:"Borrar", new_note:"📝 Nueva Nota", new_folder:"📁 Nueva Carpeta", cancel:"Cancelar", settings:"Ajustes", settings_btn:"⚙️ Ajustes", toggle_theme:"Tema", export:"📤 Exportar Copia", import:"📥 Importar Copia", close:"Cerrar", principal:"Principal", folders:"Carpetas", notes:"Notas", all:"Todas las Notas", del_f:"Borrar Carpeta", prompt_f:"Nombre de la carpeta:", prompt_b:"¿Nombre de la copia?", conf_f:"¿Borrar carpeta y todas sus notas?", conf_n:"¿Seguro que quieres borrar?", write:"Empieza a escribir...", title:"Título...", back:"Volver", search:"Buscar notas...", about_btn:"ℹ️ Sobre la Empresa", about_title:"Sobre la Empresa", about_desc:"Empresa creadora de apps, sitios y juegos.", owner:"Propietario:", founded:"Fundación:", no_cost:"(Sin costo monetario y sin CNPJ)", support_title:"💖 Apoya a la empresa", support_desc:"Vía PayPal:"},
+    jp: {save:"保存", del_note:"削除", new_note:"📝 新規メモ", new_folder:"📁 新規フォルダ", cancel:"キャンセル", settings:"設定", settings_btn:"⚙️ 設定", toggle_theme:"テーマ", export:"📤 エクスポート", import:"📥 インポート", close:"閉じる", principal:"メイン", folders:"フォルダ", notes:"メモ", all:"すべてのメモ", del_f:"フォルダを削除", prompt_f:"フォルダ名:", prompt_b:"バックアップ名?", conf_f:"フォルダと中のメモを削除しますか?", conf_n:"削除しますか?", write:"書き始める...", title:"タイトル...", back:"戻る", search:"検索...", about_btn:"ℹ️ 会社について", about_title:"会社概要", about_desc:"アプリ、サイト、ゲームの制作会社。", owner:"オーナー:", founded:"設立:", no_cost:"(金銭的コスト・CNPJなし)", support_title:"💖 会社をサポート", support_desc:"PayPal経由:"}
+};
 
-// --- TEMAS ---
-function applyTheme() {
-    document.body.classList.toggle('light-mode', currentMode === 'light');
-    ['indigo', 'purple', 'green', 'amber', 'red'].forEach(c => document.body.classList.remove('color-' + c));
-    document.body.classList.add('color-' + currentAccent);
-    localStorage.setItem('jhingl-mode', currentMode);
-    localStorage.setItem('jhingl-accent', currentAccent);
-}
-function toggleMode() { currentMode = currentMode === 'dark' ? 'light' : 'dark'; applyTheme(); }
-function setAccent(color) { currentAccent = color; applyTheme(); }
+const pastelCols = ["", "#ffb3ba", "#ffdfba", "#fdfd96", "#baffc9", "#bae1ff", "#e2cbff", "#ffc6ff"];
 
-// --- BACKUP & VISUAL ---
-function exportBackup() {
-    const fileName = prompt("Qual nome você quer dar ao arquivo?", "jhingl-backup");
-    if (fileName === null) return;
-    const data = { notes, folders, visual: { mode: currentMode, accent: currentAccent } };
-    const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${fileName || 'jhingl-backup'}.json`;
-    a.click();
-}
+let notes = []; let folders = [];
+try { const sn = JSON.parse(localStorage.getItem('j-notes')); if (Array.isArray(sn)) notes = sn; } catch(e){}
+try { const sf = JSON.parse(localStorage.getItem('j-folders')); if (Array.isArray(sf)) folders = sf; } catch(e){}
 
-function importBackup(input) {
-    const file = input.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        try {
-            const data = JSON.parse(e.target.result);
-            
-            // Carrega notas e pastas
-            if (data.notes) notes = data.notes;
-            if (data.folders) folders = data.folders;
-            
-            // Carrega e aplica VISUAL (Crucial!)
-            if (data.visual) {
-                currentMode = data.visual.mode || 'dark';
-                currentAccent = data.visual.accent || 'indigo';
-                // Salvamos antes de recarregar para garantir
-                localStorage.setItem('jhingl-mode', currentMode);
-                localStorage.setItem('jhingl-accent', currentAccent);
-                applyTheme(); 
-            }
+let viewMode = 'home'; let curFold = 'all'; let curId = null; let selCol = ""; 
+let mode = localStorage.getItem('j-mode') || 'dark'; let accent = localStorage.getItem('j-accent') || 'white'; let lang = localStorage.getItem('j-lang') || 'pt';
+let autoSaveTimer;
 
-            localStorage.setItem('jhingl-notes', JSON.stringify(notes));
-            localStorage.setItem('jhingl-folders', JSON.stringify(folders));
-            
-            alert("Backup e visual restaurados com sucesso!");
-            location.reload();
-        } catch (err) { alert("Erro ao importar."); }
-    };
-    reader.readAsText(file);
+let isSelectionMode = false;
+let selectedNotes = new Set();
+
+const ed = document.getElementById('noteEditor');
+const searchInput = document.getElementById('searchInput');
+
+window.onload = function() { try { applyTheme(); applyTrans(); renderHome(); document.execCommand("styleWithCSS", false, true); } catch(err) { document.getElementById('errorScreen').style.display = 'flex'; } };
+
+function applyTheme(){ document.body.className = "color-" + accent + " " + (mode === 'light' ? 'light-mode' : ''); localStorage.setItem('j-mode', mode); localStorage.setItem('j-accent', accent); renderColPicker(); }
+function toggleMode(){ mode = (mode === 'dark') ? 'light' : 'dark'; applyTheme(); renderHome(); }
+function setAccent(c){ accent = c; applyTheme(); }
+function setLang(l){ lang = l; localStorage.setItem('j-lang', l); applyTrans(); renderHome(); }
+
+function applyTrans(){ 
+    const t = langData[lang] || langData.pt; const elements = document.querySelectorAll('[data-t]');
+    for(let i = 0; i < elements.length; i++) { const k = elements[i].getAttribute('data-t'); if (t[k]) elements[i].innerText = t[k]; }
+    document.getElementById('noteTitleInput').placeholder = t.title; searchInput.placeholder = t.search; ed.setAttribute('data-placeholder', t.write); document.getElementById('langSelect').value = lang; 
 }
 
-// --- EDITOR ---
-function exec(cmd, val = null) {
-    editor.focus();
-    document.execCommand(cmd, false, val);
-    updateToolbar();
+function renderColPicker(){ 
+    const row = document.getElementById('noteColorPicker'); let html = "";
+    for(let i=0; i < pastelCols.length; i++){
+        const c = pastelCols[i]; const activeClass = (selCol === c) ? 'active' : ''; const bg = c ? c : 'var(--card)';
+        html += '<div class="color-opt ' + activeClass + '" style="background:' + bg + '" onclick="setNoteCol(\'' + c + '\')"></div>';
+    }
+    row.innerHTML = html;
 }
 
-function applyCustomSize(size) {
-    editor.focus();
-    const sel = window.getSelection();
-    if (!sel.rangeCount) return;
-    const range = sel.getRangeAt(0);
-    if (range.collapsed) {
+function setNoteCol(c){ 
+    selCol = c; const p = document.getElementById('notePage'); 
+    p.style.backgroundColor = c || 'var(--bg)'; p.style.color = c ? '#000000' : 'var(--text)'; 
+    ed.style.color = c ? '#000000' : 'var(--text)';
+    document.getElementById('textColorSel').value = c ? '#000000' : (mode === 'light' ? '#000000' : '#ffffff');
+    renderColPicker(); triggerAutoSave(); 
+}
+
+let savedRange = null;
+function saveSelection() { const sel = window.getSelection(); if (sel.rangeCount > 0) savedRange = sel.getRangeAt(0); }
+
+function forceBaseStyles() {
+    ed.style.fontFamily = document.getElementById('fontSel').value;
+    ed.style.fontSize = document.getElementById('sizeSel').value;
+}
+
+ed.addEventListener('keyup', function() { updateToolbar(); saveSelection(); triggerAutoSave(); if(ed.innerText.trim()==='') forceBaseStyles(); });
+ed.addEventListener('mouseup', function() { updateToolbar(); saveSelection(); });
+ed.addEventListener('touchend', function() { updateToolbar(); saveSelection(); });
+ed.addEventListener('input', function() { triggerAutoSave(); saveSelection(); if(ed.innerText.trim()==='') forceBaseStyles(); });
+
+function applyFormat(cmd, val) {
+    ed.focus(); const sel = window.getSelection();
+    if (savedRange) { sel.removeAllRanges(); sel.addRange(savedRange); }
+
+    if (cmd === 'fontName') ed.style.fontFamily = val;
+    if (cmd === 'fontSize') ed.style.fontSize = val;
+    if (cmd === 'foreColor') ed.style.color = val;
+
+    if (sel.isCollapsed && (cmd === 'fontSize' || cmd === 'fontName' || cmd === 'foreColor')) {
         const span = document.createElement('span');
-        span.style.fontSize = size;
+        if (cmd === 'fontSize') span.style.fontSize = val;
+        if (cmd === 'fontName') span.style.fontFamily = val;
+        if (cmd === 'foreColor') span.style.color = val;
         span.innerHTML = '&#8203;'; 
-        range.insertNode(span);
-        range.setStartAfter(span);
-        sel.removeAllRanges();
-        sel.addRange(range);
+        if(savedRange) {
+            savedRange.insertNode(span);
+            savedRange.setStart(span.firstChild, 1);
+            savedRange.collapse(true);
+            sel.removeAllRanges(); sel.addRange(savedRange);
+        }
     } else {
-        document.execCommand('fontSize', false, '7');
-        const fonts = editor.getElementsByTagName('font');
-        for (let i = 0; i < fonts.length; i++) {
-            if (fonts[i].size === "7") {
-                fonts[i].removeAttribute('size');
-                fonts[i].style.fontSize = size;
+        if (cmd === 'fontSize') {
+            document.execCommand('fontSize', false, '7');
+            const fonts = ed.getElementsByTagName('font');
+            for (let i = 0; i < fonts.length; i++) { if (fonts[i].size === "7") { fonts[i].removeAttribute('size'); fonts[i].style.fontSize = val; } }
+        } else if (cmd === 'foreColor') { document.execCommand('foreColor', false, val);
+        } else { document.execCommand(cmd, false, val); }
+    }
+    saveSelection(); updateToolbar(); triggerAutoSave();
+}
+
+function updateToolbar() { 
+    const cmds = ['bold', 'italic', 'underline'];
+    for(let i=0; i<cmds.length; i++){
+        const btn = document.getElementById('btn-' + cmds[i]); 
+        if(btn) { if(document.queryCommandState(cmds[i])) btn.classList.add('active'); else btn.classList.remove('active'); }
+    }
+}
+function linkifyNode(node) {
+    if (node.nodeType === 3) { 
+        const urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+)/g; const text = node.nodeValue;
+        if (urlRegex.test(text)) {
+            const span = document.createElement('span');
+            span.innerHTML = text.replace(urlRegex, function(match) { let href = match; if (!href.startsWith('http')) href = 'http://' + match; return '<a href="' + href + '" target="_blank">' + match + '</a>'; });
+            node.parentNode.replaceChild(span, node);
+        }
+    } else if (node.nodeType === 1 && node.tagName !== 'A') { 
+        for (let i = 0; i < node.childNodes.length; i++) { linkifyNode(node.childNodes[i]); }
+    }
+}
+ed.addEventListener('blur', function() { linkifyNode(ed); triggerAutoSave(); });
+
+/* --- SISTEMA NATIVO DE SELEÇÃO MÚLTIPLA --- */
+function handleCardClick(e, id) {
+    if (isSelectionMode) { e.preventDefault(); toggleSelect(id); } 
+    else { editNote(id); }
+}
+
+function handleCardLongPress(e, id) {
+    e.preventDefault(); 
+    if (!isSelectionMode) { isSelectionMode = true; selectedNotes.clear(); toggleSelect(id); }
+}
+
+function toggleSelect(id) {
+    if (selectedNotes.has(id)) selectedNotes.delete(id); else selectedNotes.add(id);
+    if (selectedNotes.size === 0) isSelectionMode = false;
+    updateSelectionUI(); renderHome();
+}
+
+function updateSelectionUI() {
+    const bar = document.getElementById('selectionBar'); const fab = document.getElementById('mainFab'); const count = document.getElementById('selCount');
+    if(isSelectionMode) {
+        bar.classList.add('show'); fab.classList.add('hidden');
+        count.innerText = selectedNotes.size + " marcadas";
+    } else {
+        bar.classList.remove('show'); fab.classList.remove('hidden');
+    }
+}
+
+function cancelSelection() { isSelectionMode = false; selectedNotes.clear(); updateSelectionUI(); renderHome(); }
+
+function deleteSelectedNotes() {
+    if(confirm(langData[lang].conf_n)) {
+        const newNotes = [];
+        for(let i=0; i<notes.length; i++){ if(!selectedNotes.has(String(notes[i].id))) newNotes.push(notes[i]); }
+        notes = newNotes;
+        try { localStorage.setItem('j-notes', JSON.stringify(notes)); } catch(e){}
+        cancelSelection();
+    }
+}
+
+function renderHome(){
+    const t = langData[lang] || langData.pt; const cont = document.getElementById('homeContainer'); const term = searchInput.value.toLowerCase();
+    
+    if (viewMode === 'home') {
+        let html = '';
+        if(!term) {
+            html += '<div class="section-header"><span>' + t.principal + '</span></div><div class="card card-special" onclick="openFolderView(\'all\')"><div class="note-title">📚 ' + t.all + '</div><div class="note-preview">' + notes.length + ' ' + t.notes + '</div></div>';
+            html += '<div class="section-header"><span>' + t.folders + '</span></div><div class="grid" id="fGrid">';
+            for(let i=0; i<folders.length; i++){
+                const f = folders[i]; let count = 0;
+                for(let j=0; j<notes.length; j++) { if (String(notes[j].folderId) === String(f.id)) count++; }
+                html += '<div class="card" onclick="openFolderView(\'' + f.id + '\')"><div class="note-title">📁 ' + f.name + '</div><div class="note-preview">' + count + ' ' + t.notes + '</div></div>';
+            }
+            html += '</div>';
+        } else {
+            html += '<div class="section-header"><span>Resultados</span></div><div class="grid" id="nGrid">';
+            let foundAny = false;
+            for(let i=0; i<notes.length; i++){
+                const n = notes[i]; const tLower = (n.title || '').toLowerCase(); const cLower = (n.content || '').toLowerCase();
+                if (tLower.indexOf(term) !== -1 || cLower.indexOf(term) !== -1) { html += createNoteCard(n); foundAny = true; }
+            }
+            html += '</div>';
+            if(!foundAny) html += '<div style="text-align:center;opacity:0.5;margin-top:20px;font-size:12px">Nenhuma nota encontrada.</div>';
+        }
+        cont.innerHTML = html;
+    } else {
+        const isAll = (curFold === 'all'); let folderName = t.all;
+        if (!isAll) { let foundFold = null; for(let i=0; i<folders.length; i++){ if(String(folders[i].id) === String(curFold)) { foundFold = folders[i]; break; } } if(foundFold) folderName = foundFold.name; }
+        
+        let html = '<div class="section-header"><button class="tb-btn" style="padding: 6px 12px; font-size:12px;" onclick="goToHome()">← ' + t.back + '</button><span style="flex:1; text-align:center; color:var(--text); font-weight:bold; font-size:14px;">' + folderName + '</span>';
+        if (!isAll) html += '<button style="background:none;border:none;color:#f87171;font-size:11px;font-weight:700" onclick="delFold()">' + t.del_f + '</button></div>'; else html += '<div style="width:60px;"></div></div>';
+        
+        html += '<div class="grid" id="nGrid">';
+        for(let i=0; i<notes.length; i++){
+            const n = notes[i]; const inFolder = isAll || (String(n.folderId) === String(curFold));
+            if (inFolder) {
+                if (term) {
+                    const tLower = (n.title || '').toLowerCase(); const cLower = (n.content || '').toLowerCase();
+                    if (tLower.indexOf(term) !== -1 || cLower.indexOf(term) !== -1) html += createNoteCard(n);
+                } else { html += createNoteCard(n); }
             }
         }
+        html += '</div>'; cont.innerHTML = html;
     }
 }
 
-function updateToolbar() {
-    ['bold', 'italic', 'underline'].forEach(b => {
-        const btn = document.getElementById('btn-' + b);
-        if(btn) document.queryCommandState(b) ? btn.classList.add('active') : btn.classList.remove('active');
-    });
-}
-
-editor.addEventListener('keyup', updateToolbar);
-editor.addEventListener('mouseup', updateToolbar);
-
-// --- HOME & PASTAS ---
-function renderHome() {
-    const container = document.getElementById('homeContainer');
-    container.innerHTML = '';
+function createNoteCard(n) {
+    const isSel = selectedNotes.has(String(n.id));
+    const selClass = isSel ? 'selected-card' : '';
+    const txt = n.color ? '#000000' : 'var(--text)'; const preview = n.content ? n.content.replace(/<[^>]*>/g, '').substring(0, 50) : '';
+    const dateStr = n.date || ''; const title = n.title || 'Sem Título'; const bg = n.color || 'var(--card)';
     
-    container.innerHTML += `<div class="section-header"><span class="section-title">Principal</span></div>`;
-    container.innerHTML += `
-        <div class="card card-special ${currentFolderId === 'all' ? 'active-folder' : ''}" onclick="filterByFolder('all')">
-            <span class="folder-icon">📚</span>
-            <div class="note-title">Todas as Notas</div>
-            <div class="note-preview">${notes.length} nota(s) no total</div>
-        </div>
-    `;
-
-    container.innerHTML += `<div class="section-header">
-        <span class="section-title">Minhas Pastas</span>
-        ${currentFolderId !== 'all' ? `<button class="btn-delete-folder" onclick="deleteCurrentFolder()">Apagar Pasta</button>` : ''}
-    </div>`;
-    
-    const fGrid = document.createElement('div');
-    fGrid.className = 'grid';
-    folders.forEach(f => {
-        fGrid.innerHTML += `<div class="card ${currentFolderId === f.id ? 'active-folder' : ''}" onclick="filterByFolder('${f.id}')"><span class="folder-icon">📁</span><div class="note-title">${f.name}</div></div>`;
-    });
-    container.appendChild(fGrid);
-
-    container.innerHTML += `<div class="section-header"><span class="section-title">Notas</span></div>`;
-    const nGrid = document.createElement('div');
-    nGrid.className = 'grid';
-    const filtered = currentFolderId === 'all' ? notes : notes.filter(n => n.folderId === currentFolderId);
-    filtered.forEach(n => {
-        const preview = n.content.replace(/<[^>]*>/g, '').substring(0, 40);
-        nGrid.innerHTML += `<div class="card" onclick="editNote(${n.id})"><div class="note-title">${n.title || 'Sem título'}</div><div class="note-preview">${preview || '...'}</div></div>`;
-    });
-    container.appendChild(nGrid);
+    let html = '<div class="card ' + selClass + '" onclick="handleCardClick(event, \'' + n.id + '\')" oncontextmenu="handleCardLongPress(event, \'' + n.id + '\')" style="background:' + bg + '; color:' + txt + '">';
+    if(isSelectionMode) { html += '<div class="select-check ' + (isSel ? '' : 'empty') + '">' + (isSel ? '✓' : '') + '</div>'; }
+    html += '<div><div class="note-title">' + title + '</div><div class="note-preview">' + preview + '...</div></div>';
+    if(dateStr) html += '<div class="note-date">' + dateStr + '</div>'; html += '</div>'; return html;
 }
 
-function filterByFolder(id) { currentFolderId = id; renderHome(); }
+function openFolderView(id){ curFold = id; viewMode = 'folder'; searchInput.value = ''; cancelSelection(); }
+function goToHome(){ viewMode = 'home'; curFold = 'all'; searchInput.value = ''; cancelSelection(); }
 
-function deleteCurrentFolder() {
-    if(confirm("Deseja apagar esta pasta? Suas notas serão movidas para 'Todas'.")) {
-        folders = folders.filter(f => f.id !== currentFolderId);
-        notes.forEach(n => { if(n.folderId === currentFolderId) n.folderId = null; });
-        localStorage.setItem('jhingl-folders', JSON.stringify(folders));
-        localStorage.setItem('jhingl-notes', JSON.stringify(notes));
-        currentFolderId = 'all';
-        renderHome();
-    }
+function startNewNote(){ 
+    curId = Date.now().toString(); document.getElementById('noteTitleInput').value = ''; ed.innerHTML = ''; 
+    setNoteCol(""); updFoldSel(); document.getElementById('noteFolderSelect').value = (curFold === 'all') ? '' : curFold; 
+    ed.style.fontSize = "18px"; ed.style.fontFamily = "'DM Sans', sans-serif";
+    showP('notePage'); updateToolbar(); closeModal('addModal'); 
 }
 
-function updateFolderSelect() {
-    let options = `<option value="">Nenhuma (Todas)</option>`;
-    options += folders.map(f => `<option value="${f.id}">${f.name}</option>`).join('');
-    document.getElementById('noteFolderSelect').innerHTML = options;
+function editNote(id){ 
+    let n = null; for(let i=0; i<notes.length; i++){ if(String(notes[i].id) === String(id)) { n = notes[i]; break; } }
+    if(!n) return; curId = String(id); document.getElementById('noteTitleInput').value = n.title; ed.innerHTML = n.content; 
+    setNoteCol(n.color || ""); updFoldSel(); document.getElementById('noteFolderSelect').value = n.folderId || ""; 
+    showP('notePage'); updateToolbar(); 
 }
 
-function startNewNote() {
-    currentNoteId = Date.now();
-    document.getElementById('noteTitleInput').value = '';
-    editor.innerHTML = '';
-    updateFolderSelect();
-    document.getElementById('noteFolderSelect').value = currentFolderId === 'all' ? '' : currentFolderId;
-    showPage('notePage');
-    closeModal('menuModal');
+function saveNoteData(){ 
+    if(!curId) return; 
+    const t = document.getElementById('noteTitleInput').value; const c = ed.innerHTML; const f = document.getElementById('noteFolderSelect').value;
+    let dateStr = ""; try { dateStr = new Date().toLocaleDateString(lang === 'pt' ? 'pt-BR' : 'en-US', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }); } catch(e){}
+    if(!t.trim() && !c.replace(/<[^>]*>/g, '').trim() && !selCol) return;
+    let idx = -1; for(let i=0; i<notes.length; i++){ if(String(notes[i].id) === String(curId)) { idx = i; break; } }
+    const d = { id: curId, title: t, content: c, folderId: f, color: selCol, date: dateStr }; 
+    if(idx > -1) notes[idx] = d; else notes.push(d); 
+    try { localStorage.setItem('j-notes', JSON.stringify(notes)); } catch(e){}
 }
 
-function startNewFolder() {
-    const name = prompt("Nome da nova pasta:");
-    if(name) {
-        folders.push({id: Date.now().toString(), name: name.trim()});
-        localStorage.setItem('jhingl-folders', JSON.stringify(folders));
-        renderHome();
-    }
-    closeModal('menuModal');
+function triggerAutoSave() { clearTimeout(autoSaveTimer); autoSaveTimer = setTimeout(function(){ saveNoteData(); }, 800); }
+function manualSave() { linkifyNode(ed); saveNoteData(); const toast = document.getElementById('saveToast'); toast.classList.add('show'); setTimeout(function(){ toast.classList.remove('show'); }, 1500); }
+function closeNote(){ linkifyNode(ed); saveNoteData(); showP('home'); renderHome(); }
+
+function deleteSingleNote(){ 
+    if(confirm(langData[lang].conf_n)){ 
+        const newNotes = []; for(let i=0; i<notes.length; i++){ if(String(notes[i].id) !== String(curId)) newNotes.push(notes[i]); }
+        notes = newNotes; localStorage.setItem('j-notes', JSON.stringify(notes)); 
+        curId = null; showP('home'); renderHome();
+    } 
 }
 
-function editNote(id) {
-    const note = notes.find(n => n.id === id);
-    if(note) {
-        currentNoteId = id;
-        document.getElementById('noteTitleInput').value = note.title;
-        editor.innerHTML = note.content;
-        updateFolderSelect();
-        document.getElementById('noteFolderSelect').value = note.folderId || "";
-        showPage('notePage');
-    }
+function delFold(){ 
+    if(confirm(langData[lang].conf_f)){ 
+        const newFolders = []; for(let i=0; i<folders.length; i++){ if(String(folders[i].id) !== String(curFold)) newFolders.push(folders[i]); }
+        folders = newFolders; const newNotes = []; for(let i=0; i<notes.length; i++){ if(String(notes[i].folderId) !== String(curFold)) newNotes.push(notes[i]); }
+        notes = newNotes; localStorage.setItem('j-folders', JSON.stringify(folders)); localStorage.setItem('j-notes', JSON.stringify(notes)); goToHome(); 
+    } 
 }
 
-function saveNote() {
-    const title = document.getElementById('noteTitleInput').value;
-    const content = editor.innerHTML;
-    const folderId = document.getElementById('noteFolderSelect').value;
-    const index = notes.findIndex(n => n.id === currentNoteId);
-    if(index > -1) notes[index] = { id: currentNoteId, title, content, folderId };
-    else notes.push({ id: currentNoteId, title, content, folderId });
-    localStorage.setItem('jhingl-notes', JSON.stringify(notes));
-    goBack();
+function updFoldSel(){ 
+    let html = '<option value="">' + langData[lang].principal + '</option>';
+    for(let i=0; i<folders.length; i++){ html += '<option value="' + folders[i].id + '">' + folders[i].name + '</option>'; }
+    document.getElementById('noteFolderSelect').innerHTML = html;
 }
 
-function deleteNote() {
-    if(confirm("Excluir esta nota?")) {
-        notes = notes.filter(n => n.id !== currentNoteId);
-        localStorage.setItem('jhingl-notes', JSON.stringify(notes));
-        goBack();
-    }
+function startNewFolder(){ const n = prompt(langData[lang].prompt_f); if(n){ folders.push({id: Date.now().toString(), name: n.trim()}); localStorage.setItem('j-folders', JSON.stringify(folders)); renderHome(); } closeModal('addModal'); }
+
+function exportBackup(){ 
+    const n = prompt(langData[lang].prompt_b, "Jhingl_Backup"); if(!n) return; 
+    const dataObj = { notes: notes, folders: folders, mode: mode, accent: accent, lang: lang };
+    const b = new Blob([JSON.stringify(dataObj)], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = n + '.json'; a.click(); 
 }
 
-function showPage(id) {
-    document.getElementById('home').style.display = id === 'home' ? 'block' : 'none';
-    document.getElementById('notePage').style.display = id === 'notePage' ? 'flex' : 'none';
+function importBackup(i){ 
+    const f = i.files[0]; if(!f) return; const r = new FileReader(); 
+    r.onload = function(e) { 
+        try {
+            const d = JSON.parse(e.target.result); notes = d.notes || []; folders = d.folders || []; 
+            if (d.mode) localStorage.setItem('j-mode', d.mode); if (d.accent) localStorage.setItem('j-accent', d.accent); if (d.lang) localStorage.setItem('j-lang', d.lang);
+            localStorage.setItem('j-notes', JSON.stringify(notes)); localStorage.setItem('j-folders', JSON.stringify(folders)); location.reload(); 
+        } catch(err) { alert("Erro ao ler arquivo de backup."); }
+    }; r.readAsText(f); 
 }
-function goBack() { showPage('home'); renderHome(); }
-function openModal(id) { document.getElementById(id).classList.add('open'); }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
-window.onload = () => { applyTheme(); renderHome(); };
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+function showP(id){ document.getElementById('home').style.display = (id === 'home') ? 'block' : 'none'; document.getElementById('notePage').style.display = (id === 'notePage') ? 'flex' : 'none'; }
+
+} catch(e) { document.write("<div style='background:#000;color:#fff;padding:20px;text-align:center;'>Erro:" + e.message + "</div>"); }
 </script>
 </body>
 </html>
