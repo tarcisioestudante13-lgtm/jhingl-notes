@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Jhingl Notes Go</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+
+:root {
+  --bg:#0a0e1a; --surface:#111827; --card:#1a2235; --card2:#1e2a3d;
+  --text:#f1f5f9; --muted:#64748b; --border:rgba(255,255,255,0.06);
+  --primary:#6366f1; --primary2:#818cf8;
+}
+
+body.light-mode {
+  --bg:#f8fafc; --surface:#ffffff; --card:#f1f5f9; --card2:#e2e8f0;
+  --text:#0f172a; --muted:#64748b; --border:rgba(0,0,0,0.08);
+}
+
+body.color-indigo { --primary:#6366f1; --primary2:#818cf8; }
+body.color-purple { --primary:#a855f7; --primary2:#c084fc; }
+body.color-green  { --primary:#10b981; --primary2:#34d399; }
+body.color-amber  { --primary:#f59e0b; --primary2:#fbbf24; }
+body.color-red    { --primary:#ef4444; --primary2:#f87171; }
+
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{font-family:'DM Sans',Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition: background 0.3s;}
+
+/* HEADER */
+.app-header{position:sticky;top:0;z-index:50;background:var(--bg);border-bottom:1px solid var(--border);padding:13px 18px;display:flex;align-items:center;justify-content:space-between;}
+.app-title{font-family:'Syne',Arial,sans-serif;font-size:20px;font-weight:800;background:linear-gradient(135deg, var(--primary), var(--primary2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-0.5px;}
+
+.container{padding:18px;}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin:15px 0 10px;}
+.section-title{font-family:'Syne',Arial,sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;color:var(--muted);letter-spacing:1px;}
+
+/* GRID & CARDS */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:15px;cursor:pointer;transition:0.2s;position:relative;}
+.card:active{transform:scale(0.96);background:var(--card2);}
+.card.active-folder{border:2px solid var(--primary);background:var(--card2);}
+
+.card-special{grid-column: span 2; background: linear-gradient(135deg, var(--card), var(--card2)); border: 1px dashed var(--primary); margin-bottom: 5px;}
+
+.folder-icon{font-size:24px;margin-bottom:8px;display:block;}
+.note-title{font-family:'Syne',Arial,sans-serif;font-size:13px;font-weight:600;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.note-preview{font-size:11px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+
+/* EDITOR PAGE */
+#notePage{display:none;flex-direction:column;position:fixed;inset:0;background:var(--bg);z-index:100;}
+.note-page-header{padding:10px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);background:var(--bg);}
+.back-btn{width:38px;height:38px;border-radius:12px;border:1px solid var(--border);background:var(--card);color:var(--text);display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.note-page-title-input{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-family:'Syne',Arial,sans-serif;font-size:17px;font-weight:700;}
+
+/* TOOLBAR */
+.editor-toolbar{background:var(--surface);border-bottom:1px solid var(--border);padding:8px;display:flex;gap:6px;overflow-x:auto;align-items:center;flex-shrink:0;}
+.tb-select{padding:6px;background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:8px;font-size:12px;outline:none;}
+.tb-btn{padding:8px 12px;background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:8px;cursor:pointer;font-weight:bold;min-width:42px;text-align:center;}
+.tb-btn.active{background:var(--primary);color:white;border-color:var(--primary);}
+
+.editor-scroll{flex:1;padding:20px;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.note-editor{min-height:100%;outline:none;line-height:1.7;font-size:18px;color:var(--text);word-wrap:break-word;}
+.note-editor:empty::before{content:attr(data-placeholder);color:var(--muted);pointer-events:none;}
+
+.note-meta-panel{background:var(--surface);border-top:1px solid var(--border);padding:15px;display:flex;flex-direction:column;gap:10px;}
+.folder-select{padding:12px;background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:12px;}
+
+.btn-row{display:flex;gap:10px;}
+.btn{flex:1;padding:14px;border-radius:12px;border:none;font-family:'Syne',Arial,sans-serif;font-weight:700;cursor:pointer;}
+.btn-save{background:var(--primary);color:white;}
+.btn-delete{background:rgba(239,68,68,0.1);color:#f87171;border:1px solid rgba(239,68,68,0.2);}
+.btn-delete-folder{background:transparent; color:#ef4444; border:none; font-size:10px; font-weight:700; text-transform:uppercase; cursor:pointer;}
+
+/* MODALS */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;z-index:200;}
+.modal-overlay.open{display:flex;}
+.modal-box{background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:22px;width:90%;max-width:350px;}
+.data-btn{width:100%;padding:14px;margin-bottom:8px;background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:12px;text-align:left;cursor:pointer;font-weight:600;}
+.theme-grid{display:flex;gap:10px;margin:15px 0;}
+.theme-dot{width:35px;height:35px;border-radius:50%;cursor:pointer;border:2px solid transparent;}
+
+.fab{position:fixed;bottom:25px;right:25px;width:60px;height:60px;border-radius:50%;background:var(--primary);color:white;border:none;font-size:30px;cursor:pointer;box-shadow:0 10px 25px rgba(0,0,0,0.4);z-index:90;}
+</style>
+</head>
+<body class="color-indigo">
+
+<div id="home">
+  <div class="app-header">
+    <div class="app-title">Jhingl Notes</div>
+    <button class="back-btn" onclick="openModal('settingsModal')">⚙️</button>
+  </div>
+  <div class="container" id="homeContainer"></div>
+</div>
+
+<div id="notePage">
+  <div class="note-page-header">
+    <button class="back-btn" onclick="goBack()">←</button>
+    <input class="note-page-title-input" id="noteTitleInput" placeholder="Título...">
+    <button class="btn-save" style="padding:8px 15px; flex:none" onclick="saveNote()">Salvar</button>
+  </div>
+
+  <div class="editor-toolbar">
+    <select class="tb-select" id="fontFamilySelect" onchange="exec('fontName', this.value)">
+      <option value="Arial">Sans</option>
+      <option value="Georgia">Serif</option>
+      <option value="Courier New">Mono</option>
+    </select>
+    
+    <select class="tb-select" id="fontSizeSelect" onchange="applyCustomSize(this.value)">
+      <option value="13px">P</option>
+      <option value="18px" selected>M</option>
+      <option value="32px">G</option>
+    </select>
+
+    <button class="tb-btn" id="btn-bold" onmousedown="event.preventDefault(); exec('bold')">B</button>
+    <button class="tb-btn" id="btn-italic" onmousedown="event.preventDefault(); exec('italic')">I</button>
+    <button class="tb-btn" id="btn-underline" onmousedown="event.preventDefault(); exec('underline')">U</button>
+  </div>
+
+  <div class="editor-scroll">
+    <div class="note-editor" id="noteEditor" contenteditable="true" data-placeholder="Escreva algo..."></div>
+  </div>
+
+  <div class="note-meta-panel">
+    <select class="folder-select" id="noteFolderSelect"></select>
+    <div class="btn-row">
+        <button class="btn btn-delete" onclick="deleteNote()">Excluir Nota</button>
+        <button class="btn btn-save" onclick="saveNote()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<button class="fab" onclick="openModal('menuModal')">+</button>
+
+<div class="modal-overlay" id="menuModal">
+  <div class="modal-box">
+    <button class="data-btn" onclick="startNewNote()">📝 Nova Nota</button>
+    <button class="data-btn" onclick="startNewFolder()">📁 Nova Pasta</button>
+    <button class="data-btn" onclick="closeModal('menuModal')" style="background:transparent; border:none; text-align:center">Cancelar</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal-box">
+    <h3>Configurações</h3>
+    <button class="data-btn" onclick="toggleMode()" style="margin-top:15px">🌓 Alternar Claro/Escuro</button>
+    <div class="theme-grid">
+      <div class="theme-dot" style="background:#6366f1" onclick="setAccent('indigo')"></div>
+      <div class="theme-dot" style="background:#a855f7" onclick="setAccent('purple')"></div>
+      <div class="theme-dot" style="background:#10b981" onclick="setAccent('green')"></div>
+      <div class="theme-dot" style="background:#f59e0b" onclick="setAccent('amber')"></div>
+      <div class="theme-dot" style="background:#ef4444" onclick="setAccent('red')"></div>
+    </div>
+    
+    <p style="font-size:11px; color:var(--muted); margin:10px 0; font-weight:700">DADOS & VISUAL</p>
+    <button class="data-btn" onclick="exportBackup()">📤 Exportar Backup Tudo (.json)</button>
+    <button class="data-btn" onclick="document.getElementById('importInput').click()">📥 Importar Backup Tudo</button>
+    <input type="file" id="importInput" style="display:none" accept=".json" onchange="importBackup(this)">
+
+    <button class="data-btn" onclick="closeModal('settingsModal')" style="text-align:center; margin-top:10px">Fechar</button>
+  </div>
+</div>
+
+<script>
+let notes = JSON.parse(localStorage.getItem('jhingl-notes')) || [];
+let folders = JSON.parse(localStorage.getItem('jhingl-folders')) || [];
+let currentFolderId = 'all';
+let currentNoteId = null;
+let currentMode = localStorage.getItem('jhingl-mode') || 'dark';
+let currentAccent = localStorage.getItem('jhingl-accent') || 'indigo';
+
+const editor = document.getElementById('noteEditor');
+
+// --- TEMAS ---
+function applyTheme() {
+    document.body.classList.toggle('light-mode', currentMode === 'light');
+    ['indigo', 'purple', 'green', 'amber', 'red'].forEach(c => document.body.classList.remove('color-' + c));
+    document.body.classList.add('color-' + currentAccent);
+    localStorage.setItem('jhingl-mode', currentMode);
+    localStorage.setItem('jhingl-accent', currentAccent);
+}
+function toggleMode() { currentMode = currentMode === 'dark' ? 'light' : 'dark'; applyTheme(); }
+function setAccent(color) { currentAccent = color; applyTheme(); }
+
+// --- BACKUP & VISUAL ---
+function exportBackup() {
+    const fileName = prompt("Qual nome você quer dar ao arquivo?", "jhingl-backup");
+    if (fileName === null) return;
+    const data = { notes, folders, visual: { mode: currentMode, accent: currentAccent } };
+    const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${fileName || 'jhingl-backup'}.json`;
+    a.click();
+}
+
+function importBackup(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const data = JSON.parse(e.target.result);
+            
+            // Carrega notas e pastas
+            if (data.notes) notes = data.notes;
+            if (data.folders) folders = data.folders;
+            
+            // Carrega e aplica VISUAL (Crucial!)
+            if (data.visual) {
+                currentMode = data.visual.mode || 'dark';
+                currentAccent = data.visual.accent || 'indigo';
+                // Salvamos antes de recarregar para garantir
+                localStorage.setItem('jhingl-mode', currentMode);
+                localStorage.setItem('jhingl-accent', currentAccent);
+                applyTheme(); 
+            }
+
+            localStorage.setItem('jhingl-notes', JSON.stringify(notes));
+            localStorage.setItem('jhingl-folders', JSON.stringify(folders));
+            
+            alert("Backup e visual restaurados com sucesso!");
+            location.reload();
+        } catch (err) { alert("Erro ao importar."); }
+    };
+    reader.readAsText(file);
+}
+
+// --- EDITOR ---
+function exec(cmd, val = null) {
+    editor.focus();
+    document.execCommand(cmd, false, val);
+    updateToolbar();
+}
+
+function applyCustomSize(size) {
+    editor.focus();
+    const sel = window.getSelection();
+    if (!sel.rangeCount) return;
+    const range = sel.getRangeAt(0);
+    if (range.collapsed) {
+        const span = document.createElement('span');
+        span.style.fontSize = size;
+        span.innerHTML = '&#8203;'; 
+        range.insertNode(span);
+        range.setStartAfter(span);
+        sel.removeAllRanges();
+        sel.addRange(range);
+    } else {
+        document.execCommand('fontSize', false, '7');
+        const fonts = editor.getElementsByTagName('font');
+        for (let i = 0; i < fonts.length; i++) {
+            if (fonts[i].size === "7") {
+                fonts[i].removeAttribute('size');
+                fonts[i].style.fontSize = size;
+            }
+        }
+    }
+}
+
+function updateToolbar() {
+    ['bold', 'italic', 'underline'].forEach(b => {
+        const btn = document.getElementById('btn-' + b);
+        if(btn) document.queryCommandState(b) ? btn.classList.add('active') : btn.classList.remove('active');
+    });
+}
+
+editor.addEventListener('keyup', updateToolbar);
+editor.addEventListener('mouseup', updateToolbar);
+
+// --- HOME & PASTAS ---
+function renderHome() {
+    const container = document.getElementById('homeContainer');
+    container.innerHTML = '';
+    
+    container.innerHTML += `<div class="section-header"><span class="section-title">Principal</span></div>`;
+    container.innerHTML += `
+        <div class="card card-special ${currentFolderId === 'all' ? 'active-folder' : ''}" onclick="filterByFolder('all')">
+            <span class="folder-icon">📚</span>
+            <div class="note-title">Todas as Notas</div>
+            <div class="note-preview">${notes.length} nota(s) no total</div>
+        </div>
+    `;
+
+    container.innerHTML += `<div class="section-header">
+        <span class="section-title">Minhas Pastas</span>
+        ${currentFolderId !== 'all' ? `<button class="btn-delete-folder" onclick="deleteCurrentFolder()">Apagar Pasta</button>` : ''}
+    </div>`;
+    
+    const fGrid = document.createElement('div');
+    fGrid.className = 'grid';
+    folders.forEach(f => {
+        fGrid.innerHTML += `<div class="card ${currentFolderId === f.id ? 'active-folder' : ''}" onclick="filterByFolder('${f.id}')"><span class="folder-icon">📁</span><div class="note-title">${f.name}</div></div>`;
+    });
+    container.appendChild(fGrid);
+
+    container.innerHTML += `<div class="section-header"><span class="section-title">Notas</span></div>`;
+    const nGrid = document.createElement('div');
+    nGrid.className = 'grid';
+    const filtered = currentFolderId === 'all' ? notes : notes.filter(n => n.folderId === currentFolderId);
+    filtered.forEach(n => {
+        const preview = n.content.replace(/<[^>]*>/g, '').substring(0, 40);
+        nGrid.innerHTML += `<div class="card" onclick="editNote(${n.id})"><div class="note-title">${n.title || 'Sem título'}</div><div class="note-preview">${preview || '...'}</div></div>`;
+    });
+    container.appendChild(nGrid);
+}
+
+function filterByFolder(id) { currentFolderId = id; renderHome(); }
+
+function deleteCurrentFolder() {
+    if(confirm("Deseja apagar esta pasta? Suas notas serão movidas para 'Todas'.")) {
+        folders = folders.filter(f => f.id !== currentFolderId);
+        notes.forEach(n => { if(n.folderId === currentFolderId) n.folderId = null; });
+        localStorage.setItem('jhingl-folders', JSON.stringify(folders));
+        localStorage.setItem('jhingl-notes', JSON.stringify(notes));
+        currentFolderId = 'all';
+        renderHome();
+    }
+}
+
+function updateFolderSelect() {
+    let options = `<option value="">Nenhuma (Todas)</option>`;
+    options += folders.map(f => `<option value="${f.id}">${f.name}</option>`).join('');
+    document.getElementById('noteFolderSelect').innerHTML = options;
+}
+
+function startNewNote() {
+    currentNoteId = Date.now();
+    document.getElementById('noteTitleInput').value = '';
+    editor.innerHTML = '';
+    updateFolderSelect();
+    document.getElementById('noteFolderSelect').value = currentFolderId === 'all' ? '' : currentFolderId;
+    showPage('notePage');
+    closeModal('menuModal');
+}
+
+function startNewFolder() {
+    const name = prompt("Nome da nova pasta:");
+    if(name) {
+        folders.push({id: Date.now().toString(), name: name.trim()});
+        localStorage.setItem('jhingl-folders', JSON.stringify(folders));
+        renderHome();
+    }
+    closeModal('menuModal');
+}
+
+function editNote(id) {
+    const note = notes.find(n => n.id === id);
+    if(note) {
+        currentNoteId = id;
+        document.getElementById('noteTitleInput').value = note.title;
+        editor.innerHTML = note.content;
+        updateFolderSelect();
+        document.getElementById('noteFolderSelect').value = note.folderId || "";
+        showPage('notePage');
+    }
+}
+
+function saveNote() {
+    const title = document.getElementById('noteTitleInput').value;
+    const content = editor.innerHTML;
+    const folderId = document.getElementById('noteFolderSelect').value;
+    const index = notes.findIndex(n => n.id === currentNoteId);
+    if(index > -1) notes[index] = { id: currentNoteId, title, content, folderId };
+    else notes.push({ id: currentNoteId, title, content, folderId });
+    localStorage.setItem('jhingl-notes', JSON.stringify(notes));
+    goBack();
+}
+
+function deleteNote() {
+    if(confirm("Excluir esta nota?")) {
+        notes = notes.filter(n => n.id !== currentNoteId);
+        localStorage.setItem('jhingl-notes', JSON.stringify(notes));
+        goBack();
+    }
+}
+
+function showPage(id) {
+    document.getElementById('home').style.display = id === 'home' ? 'block' : 'none';
+    document.getElementById('notePage').style.display = id === 'notePage' ? 'flex' : 'none';
+}
+function goBack() { showPage('home'); renderHome(); }
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+window.onload = () => { applyTheme(); renderHome(); };
+</script>
+</body>
+</html>
